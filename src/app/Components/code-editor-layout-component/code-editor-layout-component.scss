@@ -1,0 +1,45 @@
+.editor-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  padding: 15px;
+  background-color: #121212; // dark background
+  color: #e0e0e0; // light text color
+
+  .left-panel,
+  .right-panel {
+    overflow: auto;
+    height: 100%;
+    color: #e0e0e0;
+  }
+
+  .left-panel {
+    width: 50%;
+    min-width: 300px;
+    background-color: #1e1e1e; // slightly lighter dark
+  }
+
+  .right-panel {
+    flex: 1;
+    background-color: #1e1e1e;
+  }
+
+  .resizer {
+    width: 5px;
+    background-color: #444;
+    cursor: col-resize;
+    height: 100%;
+  }
+}
+
+.editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px;
+
+  .full-width {
+    width: 100%;
+  }
+ 
+}

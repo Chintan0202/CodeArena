@@ -1,0 +1,26 @@
+<div class="editor-layout">
+  <div class="left-panel" id="leftPanel">
+    <form [formGroup]="form" class="editor-form">
+      <!-- Language Dropdown -->
+      <!-- <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Questions</mat-label>
+        <mat-select formControlName="question" (selectionChange)="onQuestionChange($event.value)">
+          <mat-option *ngFor="let question of questionList" [value]="question.id">
+            {{ question.problemTitle }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field> -->
+    </form>
+    <app-problem-description 
+      [title]="currentQuestion.problemTitle" 
+      [description]="currentQuestion.problemDescription" 
+      [example]="currentQuestion.problemExample">
+    </app-problem-description>
+  </div>
+
+  <div class="resizer" (mousedown)="startResize($event)"></div>
+
+  <div class="right-panel" id="rightPanel">
+    <app-code-editor [selectedQuestion]="currentQuestion"></app-code-editor>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<form [formGroup]="form" class="editor-form">
+  <!-- Language Dropdown -->
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Language</mat-label>
+    <mat-select formControlName="language" (selectionChange)="onLanguageChange($event.value)">
+      <mat-option *ngFor="let lang of languages" [value]="lang.id">
+        {{ lang.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Code Textarea -->
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Code</mat-label>
+    <textarea matInput rows="20" formControlName="code" placeholder="Write your code here..."></textarea>
+  </mat-form-field>
+
+  <!-- Buttons -->
+  <div class="button-row">
+    <button mat-raised-button class="run-button" (click)="runCode()">Run</button>
+    <button mat-raised-button class="submit-button" (click)="submitCode()">Submit</button>
+  </div>  
+</form>
+<div class="result-panel" *ngIf="testResults.length > 0">
+  <h3>Test Case Results:</h3>
+  <div class="result-item" *ngFor="let result of testResults; let i = index">
+    <span class="test-index">Test {{ i + 1 }}:</span>
+    <span [ngClass]="{ pass: result.passed, fail: !result.passed }">
+      {{ result.passed ? 'Passed ✅' : 'Failed ❌' }}
+    </span>
+    <div class="output-details" *ngIf="!result.passed">
+      <div><strong>Expected:</strong> {{ result.expected }}</div>
+      <div><strong>Received:</strong> {{ result.actual }}</div>
+    </div>
+  </div>
+</div>

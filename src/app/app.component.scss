@@ -1,0 +1,51 @@
+.code-runner-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+
+  .form-group {
+    margin-bottom: 16px;
+    label {
+      font-weight: bold;
+      display: block;
+    }
+    select, textarea {
+      width: 100%;
+      padding: 8px;
+      font-family: monospace;
+    }
+  }
+
+  .problem-description {
+    background: #fff;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  button {
+    margin-bottom: 20px;
+    padding: 10px 20px;
+  }
+
+  .output {
+    background: #272822;
+    color: #f8f8f2;
+    padding: 12px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
+}
+::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
+  background-color: #2c2c2c;
+  color: #ffffff;
+}
+
+::ng-deep .mat-select-panel {
+  background-color: #2c2c2c;
+  color: #ffffff;
+}
