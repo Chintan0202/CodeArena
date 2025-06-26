@@ -42,7 +42,6 @@ export class CodeEditorLayoutComponent implements OnInit {
   startResize(event: MouseEvent) {
     event.preventDefault();
     const leftPanel = document.getElementById('leftPanel');
-    const rightPanel = document.getElementById('rightPanel');
 
     const startX = event.clientX;
     const startWidth = leftPanel!.offsetWidth;

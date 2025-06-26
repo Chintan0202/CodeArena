@@ -1,14 +1,16 @@
-import { CommonModule, NgFor } from '@angular/common';
+import { CommonModule, isPlatformBrowser, NgFor } from '@angular/common';
 import {
   Component,
   EventEmitter,
+  Inject,
   Input,
   OnChanges,
   OnInit,
   Output,
+  PLATFORM_ID,
   SimpleChanges,
 } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -17,6 +19,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { CodeGenerationService } from '../../Services/code-generation-service';
 import { ProblemDetails, ProblemMetadata } from '../../Models/types';
 import { CodeExecutorService } from '../../Services/code-executor-service';
+import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component';
 
 @Component({
   selector: 'app-code-editor',
@@ -32,6 +35,7 @@ import { CodeExecutorService } from '../../Services/code-executor-service';
     CommonModule,
     NgFor,
     MatOptionModule,
+    MonacoEditorComponent
   ],
 })
 export class CodeEditorComponent implements OnInit, OnChanges {
@@ -39,7 +43,7 @@ export class CodeEditorComponent implements OnInit, OnChanges {
   @Output() languageChange = new EventEmitter<number>();
   @Input() selectedQuestion?: ProblemDetails;
   form!: FormGroup;
-
+  isBrowser = false;
   languages = [
     { id: 50, name: 'C (GCC 9.2.0)' },
     { id: 54, name: 'C++ (G++ 9.2.0)' },
@@ -50,34 +54,47 @@ export class CodeEditorComponent implements OnInit, OnChanges {
   ];
   testResults: {
     passed: boolean;
-    expected: string;
-    actual: string;
+    expected: string | null;
+    actual: string | null;
+    compileError?: string;
+    hasCompileError?: boolean;
   }[] = [];
+  
   constructor(
     private fb: FormBuilder,
     private codeGenerationService: CodeGenerationService,
-    private codeExecutionService: CodeExecutorService
-  ) {}
+    private codeExecutionService: CodeExecutorService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+  code = `function greet() {\n  console.log("Hello, world!");\n}`;
 
-  ngOnInit(): void {
+  onCodeChange(updatedCode: string) {
+    console.log('Updated code:', updatedCode);
+  }
+  get codeControl(): FormControl {
+    return this.form.get('code') as FormControl;
+  }
+  
+  async ngOnInit() {
     this.form = this.fb.group({
       language: [this.languages[0].id],
-      code: [''],
+      code: [''],  // ← Monaco now bound directly to this
     });
 
-    this.form
-      .get('code')
-      ?.valueChanges.subscribe((val) => this.codeChange.emit(val));
-    this.form.get('language')?.valueChanges.subscribe((_) => {
+    this.form.get('language')?.valueChanges.subscribe(() => {
       this.languageChange.emit(this.form.get('language')?.value);
       if (this.selectedQuestion) {
         this.generateBoilerplate(this.selectedQuestion);
       }
     });
+
     if (this.selectedQuestion) {
       this.generateBoilerplate(this.selectedQuestion);
     }
   }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (
       changes['selectedQuestion'] &&
@@ -88,9 +105,11 @@ export class CodeEditorComponent implements OnInit, OnChanges {
       }
     }
   }
+
   onLanguageChange(languageId: number): void {
     console.log('Language changed to:', languageId);
   }
+
   generateBoilerplate(question: ProblemDetails) {
     const selectedLangId = this.form.get('language')?.value;
     const selectedLangKey =
@@ -102,13 +121,10 @@ export class CodeEditorComponent implements OnInit, OnChanges {
       output: question.output,
     };
 
-    const boilerplate = this.codeGenerationService.generate(
-      selectedLangKey,
-      metadata
-    );
-    this.form.get('code')?.setValue(boilerplate, { emitEvent: false });
-    this.codeChange.emit(boilerplate);
+    const boilerplate = this.codeGenerationService.generate(selectedLangKey, metadata);
+    this.form.get('code')?.setValue(boilerplate);
   }
+
   runCode(): void {
     const selectedLanguage = this.form.value.language;
     const code = this.form.value.code;
@@ -143,19 +159,31 @@ export class CodeEditorComponent implements OnInit, OnChanges {
                 const expectedOutput = testCases[index]?.expectedOutput;
                 const expected = JSON.stringify(expectedOutput);
               
-                const decoded = atob((submission.stdout ?? '').trim());
-                const sanitizedActual = decoded.replace(/\s+/g, '');
+                const hasCompileError = submission.compile_output !== null;
               
-                const sanitizedExpected = expected.replace(/\s+/g, '');
+                let actual = '';
+                let passed = false;
+                let compileError = '';
               
-                const passed = sanitizedExpected === sanitizedActual;
+                if (hasCompileError) {
+                  compileError = atob(submission.compile_output); // Decode base64 error
+                } else if (submission.stdout !== null) {
+                  const decoded = atob((submission.stdout ?? '').trim());
+                  const sanitizedActual = decoded.replace(/\s+/g, '');
+                  const sanitizedExpected = expected.replace(/\s+/g, '');
+                  passed = sanitizedExpected === sanitizedActual;
+                  actual = decoded.trim();
+                }
               
                 return {
                   passed,
-                  expected: expectedOutput,
-                  actual: decoded.trim()
+                  expected: hasCompileError ? null : expectedOutput,
+                  actual: hasCompileError ? null : actual,
+                  compileError,
+                  hasCompileError
                 };
               });
+              
     
             } else {
               setTimeout(checkResults, 1500);

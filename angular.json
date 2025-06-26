@@ -17,6 +17,9 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "loader": {
+              ".ttf":"binary"
+            },
             "outputPath": "dist/code-arena",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -27,7 +30,12 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor/min",
+                "output": "assets/monaco"
+              }
             ],
             "styles": [
               "@angular/material/prebuilt-themes/indigo-pink.css",
