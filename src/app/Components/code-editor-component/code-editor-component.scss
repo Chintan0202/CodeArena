@@ -1,133 +1,240 @@
-.editor-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 16px;
-    box-sizing: border-box;
-  
-    .language-select {
-      width: 100%;
-      margin-bottom: 12px;
-    }
-  
-    .code-area {
-      flex-grow: 1;
-      width: 100%;
-      textarea {
-        font-family: 'Courier New', monospace;
-        font-size: 14px;
-        min-height: 500px;
-        overflow: auto;
-      }
-    }
-  
-    .button-group {
-      display: flex;
-      justify-content: flex-start;
-      gap: 12px;
-      margin-top: 12px;
-    }
-  }
-  
-  .editor-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 10px;
-  
-    .full-width {
-      width: 100%;
-    }
-  
-    .button-row {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-  
-      button {
-        color: #fff;
-      }
-  
-      .run-button {
-        background-color: #1976d2; // blue
-      }
-  
-      .submit-button {
-        background-color: #2e7d32; // green
-      }
-    }
-  }
-  .result-panel {
-    background-color: #1e1e1e;
-    padding: 16px;
-    border-radius: 8px;
-    color: #fff;
-    margin-top: 20px;
-  
-    h3 {
-      margin-bottom: 12px;
-    }
-  
-    .result-item {
-      margin-bottom: 10px;
-      padding: 10px;
-      background-color: #2d2d2d;
-      border-radius: 5px;
-  
-      .test-index {
-        font-weight: bold;
-        margin-right: 10px;
-      }
-  
-      .pass {
-        color: #4caf50;
-      }
-  
-      .fail {
-        color: #f44336;
-      }
-  
-      .output-details {
-        font-size: 13px;
-        margin-top: 5px;
-  
-        div {
-          margin: 2px 0;
-        }
-      }
-    }
-  }
+/* Global container for the component */
+:host {
+  display: block;
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 15px;
+  box-sizing: border-box;
+
   /*
-  Loader container styles:
-  - Flexbox to center the spinner if needed
-  - Can be styled to take full width/height of its parent, or just wrap content.
-*/
-.loader-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* Basic styling for the spinner container */
-  /* If you want it to fill the entire content area when active: */
-  min-height: 300px; /* Adjust based on your content height */
-  /* Or if it's positioned absolutely over a parent: */
-  /* position: absolute; */
-  /* top: 0; left: 0; right: 0; bottom: 0; */
-  /* background-color: rgba(255, 255, 255, 0.9); /* Optional: semi-transparent background */
-  /* z-index: 10; /* Ensure it's above other elements if using absolute position */
+   * Use ::ng-deep to override Angular Material's default theme styles.
+   * This is necessary because theme styles often have higher specificity
+   * and apply globally, bypassing standard component encapsulation.
+   *
+   * WARNING: ::ng-deep is deprecated. For large-scale theming, consider
+   * using Angular Material's official theming APIs or placing overrides
+   * in your global styles.scss file.
+  */
+  ::ng-deep {
+      .personal-input-checkbox {
+          /* Style for the checkbox label (text) - targets MDC-specific label class */
+          .mdc-form-field__label {
+              color: #e0e0e0 !important; /* White label color */
+          }
+
+          /* Style for the checkbox square when unchecked */
+          .mat-checkbox-inner-container {
+              border: 2px solid #e0e0e0 !important; /* White border */
+              background-color: transparent !important; /* Transparent background */
+              width: 20px !important;
+              height: 20px !important;
+          }
+
+          /* Styles for the checkbox when it is in the checked state */
+          &.mat-checkbox-checked {
+              .mat-checkbox-background {
+                  background-color: #1976d2 !important; /* Blue background when checked */
+                  border-color: #1976d2 !important; /* Blue border when checked */
+              }
+              .mat-checkbox-checkmark-path {
+                  stroke: #ffffff !important; /* White checkmark inside the blue box */
+              }
+          }
+          /* You might also need to target .mat-checkbox-ripple here if its color persists */
+      }
+  }
 }
 
-/* Spinner styles (from previous loader.component.css) */
+/* Loader Container Styles */
+.loader-container.full-width-height-placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 600px;
+  background-color: #282c34;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #61dafb;
   border-radius: 50%;
-  width: 50px; /* Adjust size as needed */
-  height: 50px; /* Adjust size as needed */
+  width: 60px;
+  height: 60px;
   animation: spin 1s linear infinite;
+  margin-bottom: 15px;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-  
+
+/* Editor Form Styles */
+.editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 25px;
+  background-color: #282c34;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #abb2bf;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Enhancements for Mat Form Fields */
+mat-form-field {
+  width: 100%;
+  .mat-form-field-wrapper {
+      padding-bottom: 0;
+  }
+  .mat-form-field-flex {
+      background-color: #3e4451;
+      border-radius: 4px;
+      padding: 0.75em 0.75em 0;
+  }
+  .mat-form-field-label {
+      color: #61afef;
+  }
+  .mat-form-field-underline {
+      display: none;
+  }
+  .mat-form-field-ripple {
+      background-color: #61dafb;
+  }
+  input.mat-input-element,
+  textarea.mat-input-element,
+  .mat-select-value {
+      color: #e0e0e0;
+  }
+}
+
+/* Specific styling for the Monaco Editor wrapper */
+app-monaco-editor {
+  display: block;
+  width: 100%;
+  min-height: 400px;
+  border: 1px solid #3e4451;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.button-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+
+  /* No direct color/border here for personal-input-checkbox, handled by ::ng-deep rules */
+
+  .button-group-right {
+      display: flex;
+      gap: 15px;
+  }
+
+  button {
+      padding: 10px 25px;
+      font-size: 1rem;
+      border-radius: 5px;
+      transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+      color: #fff;
+      &:hover {
+          transform: translateY(-2px);
+          opacity: 0.9;
+      }
+      &:active {
+          transform: translateY(0);
+      }
+  }
+
+  .run-button {
+      background-color: #1976d2;
+      &:hover {
+          background-color: #1565c0;
+      }
+  }
+
+  .submit-button {
+      background-color: #2e7d32;
+      &:hover {
+          background-color: #1b5e20;
+      }
+  }
+}
+
+/* Result Panel Styles */
+.result-panel {
+  background-color: #282c34;
+  padding: 25px;
+  border-radius: 8px;
+  color: #abb2bf;
+  margin-top: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  h3 {
+      margin-bottom: 18px;
+      color: #e0e0e0;
+      font-size: 1.4em;
+      border-bottom: 1px solid #3e4451;
+      padding-bottom: 10px;
+  }
+
+  .result-item {
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #3e4451;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+
+      .test-index {
+          font-weight: bold;
+          margin-right: 15px;
+          color: #61afef;
+          min-width: 80px;
+      }
+
+      .pass {
+          color: #4caf50;
+          font-weight: bold;
+      }
+
+      .fail {
+          color: #f44336;
+          font-weight: bold;
+      }
+
+      .output-details {
+          font-size: 0.9em;
+          margin-top: 10px;
+          width: 100%;
+          padding-top: 10px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+          div {
+              margin: 5px 0;
+              color: #e0e0e0;
+          }
+          pre {
+              background-color: #1e1e1e;
+              padding: 10px;
+              border-radius: 4px;
+              overflow-x: auto;
+              white-space: pre-wrap;
+              word-break: break-all;
+              color: #f8f8f2;
+          }
+      }
+  }
+}

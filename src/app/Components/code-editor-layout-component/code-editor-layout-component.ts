@@ -61,14 +61,14 @@ export class CodeEditorLayoutComponent implements OnInit {
     });
     this.loading = false;
   }
-  @HostListener('window:beforeunload', ['$event'])
-  unloadNotification($event: any): void {
-    // If you return true or set event.returnValue to true,
-    // the browser will show a confirmation dialog.
-    // The exact message is determined by the browser, not your string.
-    $event.returnValue = true; // For older browsers
-    // return true; // Alternative for modern browsers if not using event.returnValue
-  }
+  // @HostListener('window:beforeunload', ['$event'])
+  // unloadNotification($event: any): void {
+  //   // If you return true or set event.returnValue to true,
+  //   // the browser will show a confirmation dialog.
+  //   // The exact message is determined by the browser, not your string.
+  //   $event.returnValue = true; // For older browsers
+  //   // return true; // Alternative for modern browsers if not using event.returnValue
+  // }
   startExam() {
     const durationInMinutes = 10;
     const now = Date.now();

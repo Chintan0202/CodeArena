@@ -19,30 +19,58 @@
     ></app-monaco-editor>
 
     <div class="button-row">
-      <button mat-raised-button class="run-button" (click)="runCode()">Run</button>
-      <button mat-raised-button class="submit-button" (click)="submitCode()">Submit</button>
+      <mat-checkbox formControlName="isPersonalInputEnabled" class="personal-input-checkbox">
+        Personal Input/Output
+      </mat-checkbox>
+
+      <div class="button-group-right">
+        <button mat-raised-button class="run-button"
+                (click)="form.get('isPersonalInputEnabled')?.value ? runCode() : submitCode()">
+          Run
+        </button>
+        <button mat-raised-button class="submit-button" (click)="submitExam()">Submit</button>
+      </div>
     </div>
-    <mat-form-field appearance="fill" class="full-width">
+
+    <mat-form-field *ngIf="form.get('isPersonalInputEnabled')?.value" appearance="fill" class="full-width">
       <mat-label>Input</mat-label>
       <textarea matInput rows="5" formControlName="input" placeholder="Enter your input here..."></textarea>
     </mat-form-field>
-    <mat-form-field appearance="fill" class="full-width">
+
+    <mat-form-field *ngIf="form.get('isPersonalInputEnabled')?.value" appearance="fill" class="full-width">
       <mat-label>Output</mat-label>
       <textarea matInput rows="10" formControlName="output" [disabled]="true"></textarea>
     </mat-form-field>
   </form>
 
-  <div class="result-panel" *ngIf="testResults.length > 0">
-    <h3>Test Case Results:</h3>
-    <div class="result-item" *ngFor="let result of testResults; let i = index">
-      <span class="test-index">Test {{ i + 1 }}:</span>
-      <span [ngClass]="{ pass: result.passed, fail: !result.passed }">
-        {{ result.passed ? 'Passed ✅' : result.hasCompileError ? 'Compile Error ❌' : 'Failed ❌' }}
-      </span>
+  <ng-container *ngIf="!form.get('isPersonalInputEnabled')?.value && testResults.length > 0">
+    <div class="result-panel">
+        <ng-container *ngIf="testResults[0].hasCompileError">
+            <h3>Compilation Error:</h3>
+            <div class="output-details">
+                <pre>{{ testResults[0].compileError }}</pre>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="!testResults[0].hasCompileError">
+            <h3>Test Case Results:</h3>
+            <div class="result-item" *ngFor="let result of testResults; let i = index">
+                <span class="test-index">Test {{ i + 1 }}:</span>
+                <span [ngClass]="{ pass: result.passed, fail: !result.passed }">
+                    {{ result.passed ? 'Passed ✅' : 'Failed ❌' }}
+                </span>
+                <div class="output-details" *ngIf="!result.isHidden">
+                    <div>
+                        <strong>Expected:</strong>
+                        <pre>{{ result.expected}}</pre>
+                    </div>
+                    <div>
+                        <strong>Actual:</strong>
+                        <pre>{{ result.actual}}</pre>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
     </div>
-    <div class="output-details" *ngIf="!testResults[0].passed && testResults[0].hasCompileError">
-      <div><strong>Compilation Error:</strong></div>
-      <pre>{{ testResults[0].compileError }}</pre>
-    </div>
-  </div>
+  </ng-container>
 </ng-container>

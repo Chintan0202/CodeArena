@@ -20,6 +20,9 @@ import { CodeGenerationService } from '../../Services/code-generation-service';
 import { ProblemDetails, ProblemMetadata } from '../../Models/types';
 import { CodeExecutorService } from '../../Services/code-executor-service';
 import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component';
+import { MatCheckboxModule } from '@angular/material/checkbox'; 
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog-component';
 
 @Component({
   selector: 'app-code-editor',
@@ -35,7 +38,9 @@ import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component'
     CommonModule,
     NgFor,
     MatOptionModule,
-    MonacoEditorComponent
+    MonacoEditorComponent,
+    MatCheckboxModule,
+    ConfirmationDialogComponent
   ],
 })
 export class CodeEditorComponent implements OnInit, OnChanges {
@@ -58,14 +63,16 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     actual: string | null;
     compileError?: string;
     hasCompileError?: boolean;
+    isHidden?: boolean
   }[] = [];
-  isLoading: Boolean = false;
-
+  isLoading: boolean = false;
+  isPersonalInputEnabled: boolean = false;
   constructor(
     private fb: FormBuilder,
     private codeGenerationService: CodeGenerationService,
     private codeExecutionService: CodeExecutorService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private dialog: MatDialog,
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
@@ -81,7 +88,8 @@ export class CodeEditorComponent implements OnInit, OnChanges {
       language: [this.languages[0].id],
       code: [''],
       input: [''],
-      output: [{ value: '', disabled: true }]
+      output: [{ value: '', disabled: true }],
+      isPersonalInputEnabled: false
     });
 
     this.form.get('language')?.valueChanges.subscribe(() => {
@@ -194,6 +202,7 @@ export class CodeEditorComponent implements OnInit, OnChanges {
 
               this.testResults = batch.submissions.map((submission: any, index: number) => {
                 const expectedOutput = testCases[index]?.expectedOutput;
+                const isHidden = testCases[index]?.isHidden
                 const expected = JSON.stringify(expectedOutput);
 
                 const hasCompileError = submission.compile_output !== null;
@@ -217,10 +226,93 @@ export class CodeEditorComponent implements OnInit, OnChanges {
                   expected: hasCompileError ? null : expectedOutput,
                   actual: hasCompileError ? null : actual,
                   compileError,
-                  hasCompileError
+                  hasCompileError,
+                  isHidden
                 };
               });
 
+
+            } else {
+              setTimeout(checkResults, 1500);
+            }
+          });
+      };
+
+      checkResults();
+    });
+  }
+
+  submitExam(): void {
+    debugger
+    this.isLoading = true;
+    this.testResults = [];
+    this.form.get('output')?.patchValue('');
+    let isPerfectSolution: boolean = true;
+    const selectedLanguage = this.form.value.language;
+    const code = this.form.value.code;
+    const payloads = this.codeGenerationService.generateJudge0PayloadBase64(
+      code,
+      selectedLanguage,
+      this.selectedQuestion?.testCases,
+      this.selectedQuestion ?? ({} as ProblemDetails)
+    );
+    this.codeExecutionService.executeCode(payloads).subscribe((res: any) => {
+      const tokens = res.map((r: any) => r.token);
+      const checkResults = () => {
+        this.codeExecutionService
+          .getJudge0Results(tokens)
+          .subscribe((batch: any) => {
+            const allDone = batch.submissions.every(
+              (s: any) => s.status_id >= 3
+            );
+
+            if (allDone) {
+              this.isLoading = false;
+              const testCases = this.selectedQuestion?.testCases ?? [];
+
+              this.testResults = batch.submissions.map((submission: any, index: number) => {
+                const expectedOutput = testCases[index]?.expectedOutput;
+                const isHidden = testCases[index]?.isHidden
+                const expected = JSON.stringify(expectedOutput);
+
+                const hasCompileError = submission.compile_output !== null;
+
+                let actual = '';
+                let passed = false;
+                let compileError = '';
+
+                if (hasCompileError) {
+                  compileError = atob(submission.compile_output);
+                  isPerfectSolution = false;
+                } else if (submission.stdout !== null) {
+                  const decoded = atob((submission.stdout ?? '').trim());
+                  const sanitizedActual = decoded.replace(/\r\n/g, '\n').replace(/\s+/g, '').trim();
+                  const sanitizedExpected = expected.replace(/\r\n/g, '\n').replace(/\s+/g, '').trim();
+                  passed = sanitizedExpected == sanitizedActual;
+                  if(!passed) {
+                    isPerfectSolution = false;
+                  }
+                  actual = decoded.trim();
+                }
+                return {
+                  passed,
+                  expected: hasCompileError ? null : expectedOutput,
+                  actual: hasCompileError ? null : actual,
+                  compileError,
+                  hasCompileError,
+                  isHidden
+                };
+              });
+              if(!isPerfectSolution) {
+                const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+                  width: '400px',
+                  panelClass: 'custom-dialog-container'
+                });
+                dialogRef.afterClosed().subscribe(result => {
+                  if (result) {
+                  }
+                });
+              }
 
             } else {
               setTimeout(checkResults, 1500);

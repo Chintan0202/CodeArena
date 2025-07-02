@@ -1,0 +1,30 @@
+:host {
+    .mat-mdc-dialog-content {
+      margin: 0; /* Remove default margin to control spacing */
+      padding: 0 24px 20px; /* Adjust padding as needed */
+    }
+    .mat-mdc-dialog-actions {
+      padding-bottom: 20px;
+      padding-right: 24px;
+    }
+    h2 {
+      color: #000000; /* Match your editor's dark theme */
+    }
+    mat-dialog-content {
+      color: #000000; /* Match your editor's text color */
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+    button[mat-button] {
+      color: #61afef; /* A lighter blue for cancel */
+    }
+    button[mat-raised-button] {
+      background-color: #2e7d32; /* Your submit green */
+      color: #fff;
+    }
+    button[mat-raised-button]:hover {
+      background-color: #1b5e20;
+    }
+  }
