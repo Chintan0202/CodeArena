@@ -10,8 +10,8 @@ export class CodeExecutorService {
     'https://judge0-ce.p.rapidapi.com/submissions/batch?base64_encoded=true&wait=false';
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
-    // 'X-RapidAPI-Key': 'e5a09e9bc6mshf854b4046f46a91p1783aajsn96f7ba887d11',
-    'X-RapidAPI-Key': '8bcfaa3c7dmsh57f3479b1307378p1aa0bbjsn4d6f62005a85',
+    'X-RapidAPI-Key': 'e5a09e9bc6mshf854b4046f46a91p1783aajsn96f7ba887d11',
+    // 'X-RapidAPI-Key': '8bcfaa3c7dmsh57f3479b1307378p1aa0bbjsn4d6f62005a85',
     'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
   });
 
@@ -63,7 +63,7 @@ export class CodeExecutorService {
         'fields',
         'token,stdout,stderr,status_id,language_id,compile_output'
       );
-    return this.http.get(`https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true&fields=*`, {
+    return this.http.get(`https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true&fields=token,stdout,stderr,status_id,language_id,compile_output`, {
       headers: this.headers,
     });
   }

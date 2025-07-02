@@ -106,20 +106,23 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Adjust size as needed. Example: */
-  /* width: 100%; */
-  /* height: 50px; */
-  /* background-color: rgba(255, 255, 255, 0.7); /* Optional: slight background */
-  /* border-radius: 5px; */
+  /* Basic styling for the spinner container */
+  /* If you want it to fill the entire content area when active: */
+  min-height: 300px; /* Adjust based on your content height */
+  /* Or if it's positioned absolutely over a parent: */
+  /* position: absolute; */
+  /* top: 0; left: 0; right: 0; bottom: 0; */
+  /* background-color: rgba(255, 255, 255, 0.9); /* Optional: semi-transparent background */
+  /* z-index: 10; /* Ensure it's above other elements if using absolute position */
 }
 
-/* Basic CSS Spinner (No Change) */
+/* Spinner styles (from previous loader.component.css) */
 .spinner {
-  border: 4px solid #f3f3f3; /* Light grey */
-  border-top: 4px solid #3498db; /* Blue */
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
   border-radius: 50%;
-  width: 30px; /* Smaller size for inline display */
-  height: 30px;
+  width: 50px; /* Adjust size as needed */
+  height: 50px; /* Adjust size as needed */
   animation: spin 1s linear infinite;
 }
 
@@ -127,5 +130,4 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-  
   

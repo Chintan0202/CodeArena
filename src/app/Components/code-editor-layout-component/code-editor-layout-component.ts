@@ -1,11 +1,11 @@
-import { Component, EventEmitter, HostListener, OnChanges, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, HostListener, Inject, OnChanges, OnInit, Output, PLATFORM_ID, ViewChild } from '@angular/core';
 import { ProblemDescriptionComponent } from '../problem-description-component/problem-description-component';
 import { CodeEditorComponent } from '../code-editor-component/code-editor-component';
 import { Questions } from '../../Data/Questions';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
@@ -28,21 +28,20 @@ export class CodeEditorLayoutComponent implements OnInit {
   minutes = 0;
   seconds = 0;
   timerInterval!: any;
-  loading = true; 
-  @HostListener('window:beforeunload', ['$event'])
-unloadNotification($event: any): void {
-  $event.preventDefault();
-  $event.returnValue = ''; 
-}
+  loading = true;
+
   constructor(
     private fb: FormBuilder,
+    @Inject(PLATFORM_ID) private platformId: Object
+
   ) {
-   }
+  }
   ngOnInit(): void {
-    if(document) {
+    if (isPlatformBrowser(this.platformId)) {
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-          // alert('Tab switch detected! Your activity will be logged.');
+          console.log('Tab switch detected! User became inactive. Logging this activity.');
+          // Do your logging here. Avoid 'alert()' as it's disruptive.
         }
       });
     }
@@ -52,14 +51,7 @@ unloadNotification($event: any): void {
       this.examStarted = true;
       this.startCountdown();
     }
-    // window.addEventListener('blur', () => {
-    //   alert('Tab switch detected! Your activity will be logged.');
-    // });
-  
-    // // On window regain focus
-    // window.addEventListener('focus', () => {
-    //   // alert('Tab switch detected! Your activity will be logged.');
-    // });
+
     this.form = this.fb.group({
       question: [this.questionList[0].id],
     });
@@ -69,7 +61,14 @@ unloadNotification($event: any): void {
     });
     this.loading = false;
   }
-
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any): void {
+    // If you return true or set event.returnValue to true,
+    // the browser will show a confirmation dialog.
+    // The exact message is determined by the browser, not your string.
+    $event.returnValue = true; // For older browsers
+    // return true; // Alternative for modern browsers if not using event.returnValue
+  }
   startExam() {
     const durationInMinutes = 10;
     const now = Date.now();

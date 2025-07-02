@@ -59,6 +59,7 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     compileError?: string;
     hasCompileError?: boolean;
   }[] = [];
+  isLoading: Boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -80,7 +81,7 @@ export class CodeEditorComponent implements OnInit, OnChanges {
       language: [this.languages[0].id],
       code: [''],
       input: [''],
-      output: ['']
+      output: [{ value: '', disabled: true }]
     });
 
     this.form.get('language')?.valueChanges.subscribe(() => {
@@ -126,6 +127,9 @@ export class CodeEditorComponent implements OnInit, OnChanges {
   }
 
   runCode(): void {
+    this.isLoading = true;
+    this.testResults = [];
+    this.form.get('output')?.patchValue('');
     const selectedLanguage = this.form.value.language;
     const input = this.form.get('input')?.value;
     const code = this.form.value.code;
@@ -141,11 +145,15 @@ export class CodeEditorComponent implements OnInit, OnChanges {
           .subscribe((output: any) => {
             console.log(output);
             if (output.status_id >= 3) {
+              this.isLoading = false;
               const hasCompileError = output.compile_output !== null;
               if (hasCompileError) {
                 this.form.get('output')?.patchValue(atob(output.compile_output))
               } else if (output.stdout !== null) {
                 this.form.get('output')?.patchValue(atob(output.stdout))
+              }
+              else if (output.stderr !== null) {
+                this.form.get('output')?.patchValue(atob(output.stderr))
               }
             }
             else {
@@ -159,6 +167,9 @@ export class CodeEditorComponent implements OnInit, OnChanges {
   }
 
   submitCode(): void {
+    this.isLoading = true;
+    this.testResults = [];
+    this.form.get('output')?.patchValue('');
     const selectedLanguage = this.form.value.language;
     const code = this.form.value.code;
     const payloads = this.codeGenerationService.generateJudge0PayloadBase64(
@@ -178,6 +189,7 @@ export class CodeEditorComponent implements OnInit, OnChanges {
             );
 
             if (allDone) {
+              this.isLoading = false;
               const testCases = this.selectedQuestion?.testCases ?? [];
 
               this.testResults = batch.submissions.map((submission: any, index: number) => {
