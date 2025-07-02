@@ -59,7 +59,7 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     compileError?: string;
     hasCompileError?: boolean;
   }[] = [];
-  
+
   constructor(
     private fb: FormBuilder,
     private codeGenerationService: CodeGenerationService,
@@ -68,19 +68,19 @@ export class CodeEditorComponent implements OnInit, OnChanges {
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
-  code = `function greet() {\n  console.log("Hello, world!");\n}`;
-
   onCodeChange(updatedCode: string) {
     console.log('Updated code:', updatedCode);
   }
   get codeControl(): FormControl {
     return this.form.get('code') as FormControl;
   }
-  
+
   async ngOnInit() {
     this.form = this.fb.group({
       language: [this.languages[0].id],
-      code: [''],  // ← Monaco now bound directly to this
+      code: [''],
+      input: [''],
+      output: ['']
     });
 
     this.form.get('language')?.valueChanges.subscribe(() => {
@@ -127,10 +127,35 @@ export class CodeEditorComponent implements OnInit, OnChanges {
 
   runCode(): void {
     const selectedLanguage = this.form.value.language;
+    const input = this.form.get('input')?.value;
     const code = this.form.value.code;
-    console.log('Running Code...');
-    console.log('Language ID:', selectedLanguage);
-    console.log('Code:\n', code);
+    const payload = {
+      source_code: btoa(code),
+      language_id: selectedLanguage,
+      stdin: btoa(input)
+    }
+    this.codeExecutionService.runCode(payload).subscribe((res: any) => {
+      const checkResults = () => {
+        this.codeExecutionService
+          .getJudge0ResultsRun(res.token)
+          .subscribe((output: any) => {
+            console.log(output);
+            if (output.status_id >= 3) {
+              const hasCompileError = output.compile_output !== null;
+              if (hasCompileError) {
+                this.form.get('output')?.patchValue(atob(output.compile_output))
+              } else if (output.stdout !== null) {
+                this.form.get('output')?.patchValue(atob(output.stdout))
+              }
+            }
+            else {
+              setTimeout(checkResults, 1500);
+            }
+          });
+      };
+
+      checkResults();
+    });
   }
 
   submitCode(): void {
@@ -154,27 +179,27 @@ export class CodeEditorComponent implements OnInit, OnChanges {
 
             if (allDone) {
               const testCases = this.selectedQuestion?.testCases ?? [];
-    
+
               this.testResults = batch.submissions.map((submission: any, index: number) => {
                 const expectedOutput = testCases[index]?.expectedOutput;
                 const expected = JSON.stringify(expectedOutput);
-              
+
                 const hasCompileError = submission.compile_output !== null;
-              
+
                 let actual = '';
                 let passed = false;
                 let compileError = '';
-              
+
                 if (hasCompileError) {
                   compileError = atob(submission.compile_output); // Decode base64 error
                 } else if (submission.stdout !== null) {
                   const decoded = atob((submission.stdout ?? '').trim());
-                  const sanitizedActual = decoded.replace(/\s+/g, '');
-                  const sanitizedExpected = expected.replace(/\s+/g, '');
-                  passed = sanitizedExpected === sanitizedActual;
+                  const sanitizedActual = decoded.replace(/\r\n/g, '\n').replace(/\s+/g, '').trim();
+                  const sanitizedExpected = expected.replace(/\r\n/g, '\n').replace(/\s+/g, '').trim();
+                  passed = sanitizedExpected == sanitizedActual;
                   actual = decoded.trim();
                 }
-              
+
                 return {
                   passed,
                   expected: hasCompileError ? null : expectedOutput,
@@ -183,8 +208,8 @@ export class CodeEditorComponent implements OnInit, OnChanges {
                   hasCompileError
                 };
               });
-              
-    
+
+
             } else {
               setTimeout(checkResults, 1500);
             }
@@ -192,8 +217,6 @@ export class CodeEditorComponent implements OnInit, OnChanges {
       };
 
       checkResults();
-
-      // Here you would send the code to the server for submission
     });
   }
 }

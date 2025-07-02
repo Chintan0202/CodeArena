@@ -16,7 +16,6 @@ import { CodeEditorLayoutComponent } from './Components/code-editor-layout-compo
     MatFormFieldModule,
     MatSelectModule,
     HttpClientModule,
-    NgFor,
     CodeEditorLayoutComponent,
   ],
   templateUrl: './app.component.html',

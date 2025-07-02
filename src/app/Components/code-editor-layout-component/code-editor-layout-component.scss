@@ -1,7 +1,7 @@
 .editor-layout {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  // height: 100vh;
+  // overflow: hidden;
   padding: 15px;
   background-color: #121212; // dark background
   color: #e0e0e0; // light text color
@@ -42,4 +42,119 @@
     width: 100%;
   }
  
+}
+/* Existing styles */
+
+.editor-layout {
+  display: flex;
+  height: 100vh; // Take full viewport height
+  overflow: hidden; // Prevent scrollbars on the layout itself
+}
+
+.left-panel {
+  flex-basis: 50%; // Initial width
+  min-width: 300px; // Minimum width
+  max-width: 80%; // Maximum width
+  overflow-y: auto; // Allow scrolling within the panel if content overflows
+  padding: 20px;
+  box-sizing: border-box; // Include padding in the width
+  background-color: #f9f9f9;
+  border-right: 1px solid #ddd;
+}
+
+.resizer {
+  width: 8px;
+  background-color: #ccc;
+  cursor: ew-resize;
+  flex-shrink: 0; // Prevent resizer from shrinking
+}
+
+.right-panel {
+  flex-grow: 1; // Take up remaining space
+  overflow-y: auto; // Allow scrolling within the panel
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.editor-form {
+  margin-bottom: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* --- Anti-cheat Modal Styles --- */
+#warningModal {
+  display: flex; /* Use flex to center the modal content */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top of everything */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  backdrop-filter: blur(5px); /* Optional: blur background */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto; // Removed `margin: auto;` as flex handles centering
+  padding: 30px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: fadeIn 0.3s ease-out; /* Optional: fade-in animation */
+}
+
+.close-button {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.attempts-left {
+  margin-top: 15px;
+  font-size: 1.1em;
+  color: #dc3545;
+  font-weight: bold;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Optional: Fade-in animation for modal */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

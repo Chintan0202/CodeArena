@@ -1,3 +1,6 @@
+<!-- <div *ngIf="isLoading" class="loader-container">
+  <div class="spinner"></div>
+</div> -->
 <form [formGroup]="form" class="editor-form">
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Language</mat-label>
@@ -18,6 +21,14 @@
     <button mat-raised-button class="run-button" (click)="runCode()">Run</button>
     <button mat-raised-button class="submit-button" (click)="submitCode()">Submit</button>
   </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Input</mat-label>
+    <textarea matInput rows="5" formControlName="input" placeholder="Enter your input here..."></textarea>
+  </mat-form-field>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Output</mat-label>
+    <textarea matInput rows="10" formControlName="output" [disabled]="true"></textarea>
+  </mat-form-field>
 </form>
 
 <div class="result-panel" *ngIf="testResults.length > 0">

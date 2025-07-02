@@ -35,7 +35,13 @@ export class CodeExecutorService {
       { headers: this.headers }
     );
   }
-
+  runCode(payload: any): Observable<any> {
+    return this.http.post(
+      'https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=false',
+      payload,
+      { headers: this.headers }
+    );
+  }
   getJudge0Results(token: string) {
     const params = new HttpParams()
       .set('tokens', token)
@@ -47,6 +53,18 @@ export class CodeExecutorService {
     return this.http.get(`https://judge0-ce.p.rapidapi.com/submissions/batch`, {
       headers: this.headers,
       params,
+    });
+  }
+  getJudge0ResultsRun(token: string) {
+    const params = new HttpParams()
+      .set('tokens', token)
+      .set('base64_encoded', 'true')
+      .set(
+        'fields',
+        'token,stdout,stderr,status_id,language_id,compile_output'
+      );
+    return this.http.get(`https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true&fields=*`, {
+      headers: this.headers,
     });
   }
 }

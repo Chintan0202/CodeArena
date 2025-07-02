@@ -97,6 +97,35 @@
       }
     }
   }
-  
+  /*
+  Loader container styles:
+  - Flexbox to center the spinner if needed
+  - Can be styled to take full width/height of its parent, or just wrap content.
+*/
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Adjust size as needed. Example: */
+  /* width: 100%; */
+  /* height: 50px; */
+  /* background-color: rgba(255, 255, 255, 0.7); /* Optional: slight background */
+  /* border-radius: 5px; */
+}
+
+/* Basic CSS Spinner (No Change) */
+.spinner {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 30px; /* Smaller size for inline display */
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
   
   

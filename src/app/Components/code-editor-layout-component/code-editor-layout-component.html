@@ -11,6 +11,15 @@
         </mat-select>
       </mat-form-field> -->
     </form>
+    <ng-container *ngIf="!loading">
+      <div *ngIf="!examStarted">
+        <button mat-raised-button color="primary" (click)="startExam()">Start Exam</button>
+      </div>
+    
+      <div *ngIf="examStarted">
+        <h3>⏰ Time Left: {{ minutes }}:{{ seconds | number:'2.0' }}</h3>
+      </div>
+    </ng-container>
     <app-problem-description 
       [title]="currentQuestion.problemTitle" 
       [description]="currentQuestion.problemDescription" 
