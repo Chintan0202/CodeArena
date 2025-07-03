@@ -22,12 +22,6 @@ export class CodeEditorLayoutComponent implements OnInit {
   form!: FormGroup;
   questionList = Questions
   currentQuestion = Questions[0];
-  examStarted = false;
-  examEndTime!: number;
-  timeLeft!: number;
-  minutes = 0;
-  seconds = 0;
-  timerInterval!: any;
   loading = true;
 
   constructor(
@@ -45,12 +39,6 @@ export class CodeEditorLayoutComponent implements OnInit {
         }
       });
     }
-    const endTimeStr = localStorage.getItem('examEndTime');
-    if (endTimeStr) {
-      this.examEndTime = parseInt(endTimeStr, 2);
-      this.examStarted = true;
-      this.startCountdown();
-    }
 
     this.form = this.fb.group({
       question: [this.questionList[0].id],
@@ -62,38 +50,6 @@ export class CodeEditorLayoutComponent implements OnInit {
     this.loading = false;
   }
 
-  startExam() {
-    const durationInMinutes = 10;
-    const now = Date.now();
-    this.examEndTime = now + durationInMinutes * 60 * 1000;
-
-    localStorage.setItem('examEndTime', this.examEndTime.toString());
-    this.examStarted = true;
-    this.startCountdown();
-  }
-
-  startCountdown() {
-    this.timerInterval = setInterval(() => {
-      const now = Date.now();
-      this.timeLeft = Math.floor((this.examEndTime - now) / 1000);
-
-      if (this.timeLeft <= 0) {
-        clearInterval(this.timerInterval);
-        this.onExamTimeout();
-      } else {
-        this.updateTimeDisplay();
-      }
-    }, 1000);
-  }
-
-  updateTimeDisplay() {
-    this.minutes = Math.floor(this.timeLeft / 60);
-    this.seconds = this.timeLeft % 60;
-  }
-
-  onExamTimeout() {
-    // this.codeEditorComponent.submitCode();
-  }
 
   onQuestionChange(questionId: number): void {
     console.log('Question changed to:', questionId);

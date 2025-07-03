@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { createSubmission } from '../Models/types';
 
 @Injectable({
   providedIn: 'root',
@@ -66,5 +67,8 @@ export class CodeExecutorService {
     return this.http.get(`https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true&fields=token,stdout,stderr,status_id,language_id,compile_output`, {
       headers: this.headers,
     });
+  }
+  createSubmission(requestObj: createSubmission) {
+    return this.http.post('http://localhost:5190/api/student/AddSubmission',requestObj);
   }
 }

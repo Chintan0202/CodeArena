@@ -6,6 +6,8 @@ import {
   Input,
   inject,
   PLATFORM_ID,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -18,24 +20,26 @@ import { FormControl } from '@angular/forms';
     .editor-container {
       width: 100%;
       height: 500px;
-      border: 1px solid #ccc;
+      // border: 1px solid #ccc;
     }
   `],
 })
-export class MonacoEditorComponent implements AfterViewInit {
+export class MonacoEditorComponent implements AfterViewInit, OnChanges {
   @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef;
   @Input() language: string = 'javascript';
   @Input() formControl!: FormControl;
+  @Input() readonly: boolean = true;
 
   private editor: any;
+  private monaco: typeof import('monaco-editor') | null = null;
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   async ngAfterViewInit(): Promise<void> {
     if (!this.isBrowser) return;
 
-    const monaco = await import('monaco-editor');
+    this.monaco = await import('monaco-editor');
 
-    this.editor = monaco.editor.create(this.editorContainer.nativeElement, {
+    this.editor = this.monaco.editor.create(this.editorContainer.nativeElement, {
       value: this.formControl.value || '',
       language: this.language,
       theme: 'vs-dark',
@@ -47,7 +51,8 @@ export class MonacoEditorComponent implements AfterViewInit {
       lineNumbers: 'on',
       minimap: { enabled: false },
       dragAndDrop: false,
-      links: false
+      links: false,
+      readOnly: this.readonly
     });
 
     this.editor.onDidChangeModelContent(() => {
@@ -62,9 +67,11 @@ export class MonacoEditorComponent implements AfterViewInit {
         this.editor.setValue(value || '');
       }
     });
-    // this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, () => {});
-    // this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {});
-    // this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX, () => {});
+  }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['readonly'] && !changes['readonly'].firstChange && this.editor) {
+      this.editor.updateOptions({ readOnly: this.readonly });
+    }
   }
 }

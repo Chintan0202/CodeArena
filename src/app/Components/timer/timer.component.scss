@@ -1,0 +1,19 @@
+.timer-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #fff;
+  }
+  
+  .timer-display {
+    font-weight: bold;
+    min-width: 60px;
+    text-align: right;
+  }
+  
+  .timer-button {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  

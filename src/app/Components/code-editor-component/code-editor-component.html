@@ -1,76 +1,81 @@
-<div *ngIf="isLoading" class="loader-container full-width-height-placeholder">
-  <div class="spinner"></div>
+<div class="editor-header">
+  <div class="timer-wrapper">
+    <app-timer (timerCompleted)="onTimeUp()" (examStarted)="onExamStarted()"></app-timer>
+  </div>
 </div>
+<div class="editor-body">
+  <div *ngIf="isLoading" class="loader-container full-width-height-placeholder">
+    <div class="spinner"></div>
+  </div>
 
-<ng-container *ngIf="!isLoading">
-  <form [formGroup]="form" class="editor-form">
-    <mat-form-field appearance="fill" class="full-width">
-      <mat-label>Language</mat-label>
-      <mat-select formControlName="language" (selectionChange)="onLanguageChange($event.value)">
-        <mat-option *ngFor="let lang of languages" [value]="lang.id">
-          {{ lang.name }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+  <ng-container *ngIf="!isLoading">
+    <form [formGroup]="form" class="editor-form">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Language</mat-label>
+        <mat-select formControlName="language" (selectionChange)="onLanguageChange($event.value)">
+          <mat-option *ngFor="let lang of languages" [value]="lang.id">
+            {{ lang.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <app-monaco-editor
-      [language]="'javascript'"
-      [formControl]="codeControl"
-    ></app-monaco-editor>
+      <app-monaco-editor [language]="'javascript'" [formControl]="codeControl" [readonly]="isEditorReadonly"></app-monaco-editor>
 
-    <div class="button-row">
-      <mat-checkbox formControlName="isPersonalInputEnabled" class="personal-input-checkbox">
-        Test against custom input
-      </mat-checkbox>
+      <div class="button-row">
+        <mat-checkbox formControlName="isPersonalInputEnabled" class="personal-input-checkbox">
+          Test against custom input
+        </mat-checkbox>
 
-      <div class="button-group-right">
-        <button mat-raised-button class="run-button"
-                (click)="form.get('isPersonalInputEnabled')?.value ? runCode() : submitCode()">
-          Run
-        </button>
-        <button mat-raised-button class="submit-button" (click)="submitExam()">Submit</button>
+        <div class="button-group-right">
+          <button mat-raised-button class="run-button"
+            (click)="form.get('isPersonalInputEnabled')?.value ? runCode() : submitCode()">
+            Run
+          </button>
+          <button mat-raised-button class="submit-button" (click)="submitExam(false)">Submit</button>
+        </div>
       </div>
-    </div>
 
-    <mat-form-field *ngIf="form.get('isPersonalInputEnabled')?.value" appearance="fill" class="full-width">
-      <mat-label>Input</mat-label>
-      <textarea matInput rows="5" formControlName="input" placeholder="Enter your input here..."></textarea>
-    </mat-form-field>
+      <mat-form-field *ngIf="form.get('isPersonalInputEnabled')?.value" appearance="fill" class="full-width">
+        <mat-label>Input</mat-label>
+        <textarea matInput rows="5" formControlName="input" placeholder="Enter your input here..."></textarea>
+      </mat-form-field>
 
-    <mat-form-field *ngIf="form.get('isPersonalInputEnabled')?.value" appearance="fill" class="full-width">
-      <mat-label>Output</mat-label>
-      <textarea matInput rows="10" formControlName="output" [disabled]="true"></textarea>
-    </mat-form-field>
-  </form>
+      <mat-form-field *ngIf="form.get('isPersonalInputEnabled')?.value" appearance="fill" class="full-width">
+        <mat-label>Output</mat-label>
+        <textarea matInput rows="10" formControlName="output" [disabled]="true"></textarea>
+      </mat-form-field>
+    </form>
 
-  <ng-container *ngIf="!form.get('isPersonalInputEnabled')?.value && testResults.length > 0">
-    <div class="result-panel">
+    <ng-container *ngIf="!form.get('isPersonalInputEnabled')?.value && testResults.length > 0">
+      <div class="result-panel">
         <ng-container *ngIf="testResults[0].hasCompileError">
-            <h3>Compilation Error:</h3>
-            <div class="output-details">
-                <pre>{{ testResults[0].compileError }}</pre>
-            </div>
+          <h3>Compilation Error:</h3>
+          <div class="output-details">
+            <pre>{{ testResults[0].compileError }}</pre>
+          </div>
         </ng-container>
 
         <ng-container *ngIf="!testResults[0].hasCompileError">
-            <h3>Test Case Results:</h3>
-            <div class="result-item" *ngFor="let result of testResults; let i = index">
-                <span class="test-index">Test {{ i + 1 }}:</span>
-                <span [ngClass]="{ pass: result.passed, fail: !result.passed }">
-                    {{ result.passed ? result.isHidden ? 'Hidden Testcase Passed ✅' : ' Passed ✅' : result.isHidden ?  'Hidden Testcase Failed ❌' : 'Failed ❌' }}
-                </span>
-                <div class="output-details" *ngIf="!result.isHidden">
-                    <div>
-                        <strong>Expected:</strong>
-                        <pre>{{ result.expected}}</pre>
-                    </div>
-                    <div>
-                        <strong>Actual:</strong>
-                        <pre>{{ result.actual}}</pre>
-                    </div>
-                </div>
+          <h3>Test Case Results:</h3>
+          <div class="result-item" *ngFor="let result of testResults; let i = index">
+            <span class="test-index">Test {{ i + 1 }}:</span>
+            <span [ngClass]="{ pass: result.passed, fail: !result.passed }">
+              {{ result.passed ? result.isHidden ? 'Hidden Testcase Passed ✅' : ' Passed ✅' : result.isHidden ? 'Hidden
+              Testcase Failed ❌' : 'Failed ❌' }}
+            </span>
+            <div class="output-details" *ngIf="!result.isHidden">
+              <div>
+                <strong>Expected:</strong>
+                <pre>{{ result.expected}}</pre>
+              </div>
+              <div>
+                <strong>Actual:</strong>
+                <pre>{{ result.actual}}</pre>
+              </div>
             </div>
+          </div>
         </ng-container>
-    </div>
+      </div>
+    </ng-container>
   </ng-container>
-</ng-container>
+</div>

@@ -51,9 +51,9 @@
   flex-direction: column;
   gap: 20px;
   padding: 25px;
-  background-color: #282c34;
+//   background-color: #282c34;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+//   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   color: #abb2bf;
 }
 
@@ -213,4 +213,24 @@ app-monaco-editor {
   ~ .mdc-checkbox__background {
   border-color: white !important;
 }
-
+.editor-header {
+    display: flex;
+    justify-content: flex-end; /* Right-align timer */
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .timer-wrapper {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  ::ng-deep .snackbar-warning {
+    background-color: #d32f2f;
+    color: #fff;
+    font-weight: bold;
+  }
+  ::ng-deep .snackbar-success {
+    background-color: #0ecf3e;
+    color: #fff;
+    font-weight: bold;
+  }

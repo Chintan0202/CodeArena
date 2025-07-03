@@ -1,10 +1,5 @@
 <div class="editor-layout">
   <div class="left-panel" id="leftPanel">
-    <ng-container *ngIf="!loading">
-      <div *ngIf="!examStarted">
-        <button mat-raised-button color="primary" (click)="startExam()">Start Exam</button>
-      </div>
-    </ng-container>
     <app-problem-description 
       [title]="currentQuestion.problemTitle" 
       [description]="currentQuestion.problemDescription" 

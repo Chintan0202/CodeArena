@@ -14,3 +14,11 @@ export interface ProblemDetails {
   problemExample: string;
   testCases: any;
 }
+
+export interface createSubmission {
+  code: string;
+  languageId: number,
+  studentId: number,
+  questionId: number,
+  isSubmitted: boolean
+}
