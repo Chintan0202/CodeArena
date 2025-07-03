@@ -6,41 +6,11 @@
   padding: 0 15px;
   box-sizing: border-box;
 
-  /*
-   * Use ::ng-deep to override Angular Material's default theme styles.
-   * This is necessary because theme styles often have higher specificity
-   * and apply globally, bypassing standard component encapsulation.
-   *
-   * WARNING: ::ng-deep is deprecated. For large-scale theming, consider
-   * using Angular Material's official theming APIs or placing overrides
-   * in your global styles.scss file.
-  */
   ::ng-deep {
       .personal-input-checkbox {
-          /* Style for the checkbox label (text) - targets MDC-specific label class */
-          .mdc-form-field__label {
+          .mdc-form-field {
               color: #e0e0e0 !important; /* White label color */
           }
-
-          /* Style for the checkbox square when unchecked */
-          .mat-checkbox-inner-container {
-              border: 2px solid #e0e0e0 !important; /* White border */
-              background-color: transparent !important; /* Transparent background */
-              width: 20px !important;
-              height: 20px !important;
-          }
-
-          /* Styles for the checkbox when it is in the checked state */
-          &.mat-checkbox-checked {
-              .mat-checkbox-background {
-                  background-color: #1976d2 !important; /* Blue background when checked */
-                  border-color: #1976d2 !important; /* Blue border when checked */
-              }
-              .mat-checkbox-checkmark-path {
-                  stroke: #ffffff !important; /* White checkmark inside the blue box */
-              }
-          }
-          /* You might also need to target .mat-checkbox-ripple here if its color persists */
       }
   }
 }
@@ -238,3 +208,9 @@ app-monaco-editor {
       }
   }
 }
+.mdc-checkbox.mdc-checkbox--touch 
+  .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate):not([data-indeterminate='true']) 
+  ~ .mdc-checkbox__background {
+  border-color: white !important;
+}
+

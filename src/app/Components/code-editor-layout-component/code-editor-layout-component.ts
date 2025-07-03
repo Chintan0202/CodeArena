@@ -61,14 +61,7 @@ export class CodeEditorLayoutComponent implements OnInit {
     });
     this.loading = false;
   }
-  // @HostListener('window:beforeunload', ['$event'])
-  // unloadNotification($event: any): void {
-  //   // If you return true or set event.returnValue to true,
-  //   // the browser will show a confirmation dialog.
-  //   // The exact message is determined by the browser, not your string.
-  //   $event.returnValue = true; // For older browsers
-  //   // return true; // Alternative for modern browsers if not using event.returnValue
-  // }
+
   startExam() {
     const durationInMinutes = 10;
     const now = Date.now();
@@ -108,23 +101,31 @@ export class CodeEditorLayoutComponent implements OnInit {
   }
   startResize(event: MouseEvent) {
     event.preventDefault();
+  
     const leftPanel = document.getElementById('leftPanel');
-
+    const rightPanel = document.getElementById('rightPanel');
+  
     const startX = event.clientX;
     const startWidth = leftPanel!.offsetWidth;
-
-    const mouseMove = (moveEvent: MouseEvent) => {
-      const newWidth = startWidth + (moveEvent.clientX - startX);
-      leftPanel!.style.width = `${newWidth}px`;
+  
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const newWidth = startWidth + delta;
+  
+      // Apply boundaries
+      if (newWidth >= 200 && newWidth <= window.innerWidth * 0.8) {
+        leftPanel!.style.width = `${newWidth}px`;
+      }
     };
-
-    const mouseUp = () => {
-      document.removeEventListener('mousemove', mouseMove);
-      document.removeEventListener('mouseup', mouseUp);
+  
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
     };
-
-    document.addEventListener('mousemove', mouseMove);
-    document.addEventListener('mouseup', mouseUp);
+  
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
+  
 
 }

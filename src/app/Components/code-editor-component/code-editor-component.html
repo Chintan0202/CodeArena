@@ -20,7 +20,7 @@
 
     <div class="button-row">
       <mat-checkbox formControlName="isPersonalInputEnabled" class="personal-input-checkbox">
-        Personal Input/Output
+        Test against custom input
       </mat-checkbox>
 
       <div class="button-group-right">
@@ -57,7 +57,7 @@
             <div class="result-item" *ngFor="let result of testResults; let i = index">
                 <span class="test-index">Test {{ i + 1 }}:</span>
                 <span [ngClass]="{ pass: result.passed, fail: !result.passed }">
-                    {{ result.passed ? 'Passed ✅' : 'Failed ❌' }}
+                    {{ result.passed ? result.isHidden ? 'Hidden Testcase Passed ✅' : ' Passed ✅' : result.isHidden ?  'Hidden Testcase Failed ❌' : 'Failed ❌' }}
                 </span>
                 <div class="output-details" *ngIf="!result.isHidden">
                     <div>

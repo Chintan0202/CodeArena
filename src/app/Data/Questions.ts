@@ -28,7 +28,7 @@ export const Questions: ProblemDetails[] = [
       {
         input: [[2, 7, 11, 15], 9],
         expectedOutput: [0,1],
-        isHidden: true
+        isHidden: false
       },
       {
         input: [[3, 2, 4], 6],
@@ -38,7 +38,7 @@ export const Questions: ProblemDetails[] = [
       {
         input: [[3, 3], 6],
         expectedOutput: [0,1],
-        isHidden: false
+        isHidden: true
       },
     ],
   },
