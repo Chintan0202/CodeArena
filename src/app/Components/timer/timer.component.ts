@@ -18,7 +18,7 @@ import {
 })
 export class TimerComponent implements OnInit, OnDestroy {
   private readonly STORAGE_KEY = 'countdown_end_time';
-  private readonly DEFAULT_TIME = 1 * 60; 
+  private readonly DEFAULT_TIME = 5 * 60; 
 
   @Output() timerCompleted = new EventEmitter<void>();
   @Output() examStarted = new EventEmitter<void>();
@@ -77,7 +77,7 @@ export class TimerComponent implements OnInit, OnDestroy {
   }
 
   private handleTimerEnd() {
-    this.timeLeft.set(1*60);
+    this.timeLeft.set(this.DEFAULT_TIME);
     this.timerCompleted.emit();
     localStorage.removeItem(this.STORAGE_KEY);
   }

@@ -11,8 +11,8 @@ export class CodeExecutorService {
     'https://judge0-ce.p.rapidapi.com/submissions/batch?base64_encoded=true&wait=false';
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
-    'X-RapidAPI-Key': 'e5a09e9bc6mshf854b4046f46a91p1783aajsn96f7ba887d11',
-    // 'X-RapidAPI-Key': '8bcfaa3c7dmsh57f3479b1307378p1aa0bbjsn4d6f62005a85',
+    // 'X-RapidAPI-Key': 'e5a09e9bc6mshf854b4046f46a91p1783aajsn96f7ba887d11',
+    'X-RapidAPI-Key': '8bcfaa3c7dmsh57f3479b1307378p1aa0bbjsn4d6f62005a85',
     'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
   });
 
@@ -70,5 +70,11 @@ export class CodeExecutorService {
   }
   createSubmission(requestObj: createSubmission) {
     return this.http.post('http://localhost:5190/api/student/AddSubmission',requestObj);
+  }
+  updateSubmission(requestObj: createSubmission, submissionId: number) {
+    return this.http.put(`http://localhost:5190/api/student/submission/${submissionId}`,requestObj);
+  }
+  getSubmission(submissionId: number) {
+    return this.http.get(`http://localhost:5190/api/student/GetSubmissionById/${submissionId}`);
   }
 }

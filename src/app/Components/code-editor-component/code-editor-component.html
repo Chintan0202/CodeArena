@@ -1,5 +1,5 @@
 <div class="editor-header">
-  <div class="timer-wrapper">
+  <div class="timer-wrapper" *ngIf="!isFinalSubmissionHappen">
     <app-timer (timerCompleted)="onTimeUp()" (examStarted)="onExamStarted()"></app-timer>
   </div>
 </div>
@@ -21,7 +21,7 @@
 
       <app-monaco-editor [language]="'javascript'" [formControl]="codeControl" [readonly]="isEditorReadonly"></app-monaco-editor>
 
-      <div class="button-row">
+      <div class="button-row" *ngIf="!isFinalSubmissionHappen && examStarted()">
         <mat-checkbox formControlName="isPersonalInputEnabled" class="personal-input-checkbox">
           Test against custom input
         </mat-checkbox>
