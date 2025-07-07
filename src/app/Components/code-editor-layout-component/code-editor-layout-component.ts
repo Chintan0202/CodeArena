@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-code-editor-layout-component',
@@ -23,30 +24,26 @@ export class CodeEditorLayoutComponent implements OnInit {
   questionList = Questions
   currentQuestion = Questions[0];
   loading = true;
-
+  questionId: number = 0;
+  isPreview: boolean = false;
   constructor(
     private fb: FormBuilder,
-    @Inject(PLATFORM_ID) private platformId: Object
-
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private route: ActivatedRoute,
   ) {
+    this.questionId = Number(this.route.snapshot.paramMap.get('questionId'));
+    this.isPreview = this.route.snapshot.paramMap.get('isPreview') === 'true';
   }
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
           console.log('Tab switch detected! User became inactive. Logging this activity.');
-          // Do your logging here. Avoid 'alert()' as it's disruptive.
         }
       });
     }
 
-    this.form = this.fb.group({
-      question: [this.questionList[0].id],
-    });
-
-    this.form.get('question')?.valueChanges.subscribe((_) => {
-      this.questionChange.emit(this.form.get('question')?.value);
-    });
+    this.currentQuestion = this.questionList.find((question) => question.id == this.questionId) || Questions[0];
     this.loading = false;
   }
 

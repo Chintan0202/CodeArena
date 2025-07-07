@@ -30,6 +30,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { TimerComponent } from '../timer/timer.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-code-editor',
   standalone: true,
@@ -51,7 +52,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatSnackBarModule
   ],
 })
-export class CodeEditorComponent implements OnInit, OnChanges {
+export class CodeEditorComponent implements OnInit {
   @Output() codeChange = new EventEmitter<string>();
   @Output() languageChange = new EventEmitter<number>();
   @Input() selectedQuestion?: ProblemDetails;
@@ -84,39 +85,40 @@ export class CodeEditorComponent implements OnInit, OnChanges {
   currentSubmissionId = signal<number | null>(null); // Signal to store the current submission ID for autosave
   autoSaveIntervalId: any; // Stores the interval ID for clearing
   isFinalSubmissionHappen: boolean = false;
+  questionId: number = 0;
+  isPreview: boolean = false;
   constructor(
     private fb: FormBuilder,
     private codeGenerationService: CodeGenerationService,
     private codeExecutionService: CodeExecutorService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
+    this.questionId = Number(this.route.snapshot.paramMap.get('questionId'));
+    this.isPreview = this.isFinalSubmissionHappen = this.route.snapshot.paramMap.get('isPreview') === 'true';
     this.isBrowser = isPlatformBrowser(this.platformId);
+    if (!this.isPreview) {
+      effect(() => {
+        if (this.examStarted()) {
+          if (this.autoSaveIntervalId) {
+            clearInterval(this.autoSaveIntervalId);
+          }
+          this.autoSaveIntervalId = setInterval(() => {
+            this.onTemporarySave(true, this.currentSubmissionId());
+          }, 60000);
 
-    // Angular effect to manage autosave interval based on examStarted signal
-    effect(() => {
-      if (this.examStarted()) {
-        // Clear any existing interval to prevent duplicates
-        if (this.autoSaveIntervalId) {
-          clearInterval(this.autoSaveIntervalId);
-        }
-        // Set new autosave interval
-        this.autoSaveIntervalId = setInterval(() => {
-          // Call autosave with the current submission ID from the signal
-          this.onTemporarySave(true, this.currentSubmissionId());
-        }, 30000); // Autosave every 1 minute
-
-        // Automatically clear interval when component is destroyed
-        this.destroyRef.onDestroy(() => {
+          this.destroyRef.onDestroy(() => {
+            clearInterval(this.autoSaveIntervalId);
+            this.autoSaveIntervalId = null;
+          });
+        } else {
           clearInterval(this.autoSaveIntervalId);
           this.autoSaveIntervalId = null;
-        });
-      } else {
-        // If exam is not started or has ended, clear the interval
-        clearInterval(this.autoSaveIntervalId);
-        this.autoSaveIntervalId = null;
-      }
-    });
+        }
+      });
+    }
   }
 
   onCodeChange(updatedCode: string) {
@@ -137,45 +139,49 @@ export class CodeEditorComponent implements OnInit, OnChanges {
       isPersonalInputEnabled: false
     });
 
+
     // Subscribe to language changes to regenerate boilerplate code
 
     // Attempt to load a previous submission if ID exists in localStorage
-    const storedSubmissionId = Number(localStorage.getItem('submissionId'));
-    if (storedSubmissionId && !isNaN(storedSubmissionId)) {
-      this.currentSubmissionId.set(storedSubmissionId); // Set the signal with the stored ID
-      this.getSubmission(storedSubmissionId);
-    }
-    else{
-      this.form.get('language')?.valueChanges
-        .pipe(takeUntilDestroyed(this.destroyRef)) // Automatically unsubscribe
-        .subscribe(() => {
-          this.languageChange.emit(this.form.get('language')?.value);
-          if (this.selectedQuestion) {
-            this.generateBoilerplate(this.selectedQuestion);
-          }
-        });
-  
-      // Generate boilerplate for the initially selected question
-      if (this.selectedQuestion) {
-        this.generateBoilerplate(this.selectedQuestion);
-      }
-    }
-  }
+    // const storedSubmissionId = Number(localStorage.getItem('submissionId'));
+    // if (storedSubmissionId && !isNaN(storedSubmissionId) && !this.isPreview) {
+    //   this.currentSubmissionId.set(storedSubmissionId);
+    //   this.getSubmission(storedSubmissionId);
+    // }
+    // else if (this.isPreview) {
+    this.getSubmittedCode(this.questionId);
+    // }
+    // else {
+    //   this.form.get('language')?.valueChanges
+    //     .pipe(takeUntilDestroyed(this.destroyRef)) // Automatically unsubscribe
+    //     .subscribe(() => {
+    //       this.languageChange.emit(this.form.get('language')?.value);
+    //       if (this.selectedQuestion) {
+    //         this.generateBoilerplate(this.selectedQuestion);
+    //       }
+    //     });
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // React to changes in the selectedQuestion Input property
-    if (
-      changes['selectedQuestion'] &&
-      changes['selectedQuestion'].currentValue
-    ) {
-      if (this.selectedQuestion) {
-        // this.generateBoilerplate(this.selectedQuestion);
-        // Reset results when a new question is selected
-        this.testResults = [];
-        this.form.get('output')?.patchValue('');
-      }
-    }
+    //   // Generate boilerplate for the initially selected question
+    //   if (this.selectedQuestion) {
+    //     this.generateBoilerplate(this.selectedQuestion);
+    //   }
+    // }
   }
+  //No need as we will now get the question and load that
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   // React to changes in the selectedQuestion Input property
+  //   if (
+  //     changes['selectedQuestion'] &&
+  //     changes['selectedQuestion'].currentValue
+  //   ) {
+  //     if (this.selectedQuestion) {
+  //       // this.generateBoilerplate(this.selectedQuestion);
+  //       // Reset results when a new question is selected
+  //       this.testResults = [];
+  //       this.form?.get('output')?.patchValue('');
+  //     }
+  //   }
+  // }
 
   onLanguageChange(languageId: number): void {
     console.log('Language changed to:', languageId);
@@ -254,10 +260,7 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     );
 
     this.executeCodeOnJudge0(payloads, true, true, timeOut); // Pass isExamSubmission = true and timeOut status
-    clearInterval(this.autoSaveIntervalId); // Stop autosave
-    this.autoSaveIntervalId = null;
-    this.isEditorReadonly = true; // Make editor readonly after submission
-    this.isFinalSubmissionHappen = true;
+  
   }
 
   /**
@@ -294,17 +297,16 @@ export class CodeEditorComponent implements OnInit, OnChanges {
           resultsObservable.subscribe({
             next: (batchOrOutput: any) => {
               const submissions = isBatch ? batchOrOutput.submissions : [batchOrOutput];
-              const allDone = submissions.every((s: any) => s.status_id >= 3); // Status ID 3 means Accepted, 4 means Wrong Answer, etc.
+              const allDone = submissions.every((s: any) => s.status_id >= 3);
 
               if (allDone) {
                 this.isLoading = false;
                 const testCases = this.selectedQuestion?.testCases ?? [];
-                let isPerfectSolution: boolean = true; // Tracks if all tests passed for exam submission
+                let isPerfectSolution: boolean = true;
 
                 this.testResults = submissions.map((submission: any, index: number) => {
                   const expectedOutput = testCases[index]?.expectedOutput;
                   const isHidden = testCases[index]?.isHidden;
-                  // Stringify expectedOutput for robust comparison
                   const expected = JSON.stringify(expectedOutput);
 
                   const hasCompileError = submission.compile_output !== null;
@@ -314,20 +316,19 @@ export class CodeEditorComponent implements OnInit, OnChanges {
 
                   if (hasCompileError) {
                     compileError = atob(submission.compile_output);
-                    if (isExamSubmission) isPerfectSolution = false; // Compile error means not perfect
+                    if (isExamSubmission) isPerfectSolution = false;
                   } else if (submission.stdout !== null) {
                     const decoded = atob((submission.stdout ?? '').trim());
-                    // Normalize line endings and remove all whitespace for strict comparison
                     const sanitizedActual = decoded.replace(/\r\n/g, '\n').replace(/\s+/g, '').trim();
                     const sanitizedExpected = expected.replace(/\r\n/g, '\n').replace(/\s+/g, '').trim();
-                    passed = sanitizedExpected === sanitizedActual; // Strict equality check
+                    passed = sanitizedExpected === sanitizedActual;
                     if (isExamSubmission && !passed) {
                       isPerfectSolution = false;
                     }
                     actual = decoded.trim();
-                  } else if (submission.stderr !== null) { // Handle runtime errors or other execution issues
+                  } else if (submission.stderr !== null) {
                     actual = atob(submission.stderr).trim();
-                    passed = false; // Runtime error means it didn't pass
+                    passed = false;
                     if (isExamSubmission) isPerfectSolution = false;
                   }
 
@@ -352,27 +353,23 @@ export class CodeEditorComponent implements OnInit, OnChanges {
                   }
                 }
 
-                // Logic specific to exam submission
                 if (isExamSubmission) {
                   if (!isPerfectSolution && !isTimeOut) {
-                    // If not perfect solution and not a timeout, ask for confirmation
                     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
                       width: '400px',
                       panelClass: 'custom-dialog-container'
                     });
                     dialogRef.afterClosed().subscribe(result => {
                       if (result) {
-                        this.onSave(true); // User confirmed, submit
+                        this.onSave(true);
                       }
                     });
                   } else {
-                    // If perfect solution or timeout, submit immediately
                     this.onSave(true);
                   }
                 }
 
               } else {
-                // If not all submissions are done, poll again after a delay
                 setTimeout(checkResults, 1500);
               }
             },
@@ -393,13 +390,9 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     });
   }
 
-  /**
-   * Called when the exam timer starts. Enables the editor and triggers initial save.
-   */
   onExamStarted() {
-    this.isEditorReadonly = false; // Make editor editable
-    this.examStarted.set(true); // Update examStarted signal
-    // If no submission ID exists yet, create a new temporary submission
+    this.isEditorReadonly = false;
+    this.examStarted.set(true);
     if (this.currentSubmissionId() === null) {
       this.onTemporarySave(false);
     }
@@ -416,10 +409,6 @@ export class CodeEditorComponent implements OnInit, OnChanges {
       verticalPosition: 'bottom'
     });
     this.submitExam(true); // Submit exam, indicating it's a timeout submission
-    clearInterval(this.autoSaveIntervalId); // Stop autosave
-    this.autoSaveIntervalId = null;
-    this.isEditorReadonly = true; // Make editor readonly after submission
-    this.isFinalSubmissionHappen = true;
   }
 
   /**
@@ -431,9 +420,9 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     const requestObj: createSubmission = {
       code: btoa(this.form.value.code),
       languageId: this.form.value.language,
-      studentId: 1, 
+      studentId: 1,
       isSubmitted,
-      questionId: 1 
+      questionId: this.questionId
     }
 
     if (this.currentSubmissionId()) {
@@ -447,6 +436,12 @@ export class CodeEditorComponent implements OnInit, OnChanges {
               horizontalPosition: 'end',
               verticalPosition: 'bottom'
             });
+            clearInterval(this.autoSaveIntervalId); // Stop autosave
+            this.autoSaveIntervalId = null;
+            this.isEditorReadonly = true; // Make editor readonly after submission
+            this.isFinalSubmissionHappen = true;
+            localStorage.clear();
+            this.router.navigate(['/questions']);
           },
           error: (err) => {
             this.snackBar.open('Failed to save/submit code. Please try again.', 'Close', { duration: 3000 });
@@ -459,15 +454,20 @@ export class CodeEditorComponent implements OnInit, OnChanges {
         .subscribe({
           next: (res: any) => {
             if (res.submissionId) {
-              this.currentSubmissionId.set(res.submissionId); // Update the signal
-              localStorage.setItem('submissionId', res.submissionId); // Store in localStorage (FIXED TYPO HERE)
+              this.currentSubmissionId.set(res.submissionId);
+              localStorage.setItem('submissionId', res.submissionId);
               this.snackBar.open(isSubmitted ? 'Exam submitted successfully!' : 'Code saved successfully!', 'Close', {
                 duration: 3000,
                 panelClass: 'snackbar-success',
                 horizontalPosition: 'end',
                 verticalPosition: 'bottom'
               });
-              // No need to call getSubmission after creation here, as we already have the code and ID.
+              clearInterval(this.autoSaveIntervalId); // Stop autosave
+              this.autoSaveIntervalId = null;
+              this.isEditorReadonly = true; // Make editor readonly after submission
+              this.isFinalSubmissionHappen = true;
+              localStorage.clear();
+              this.router.navigate(['/questions']);
             }
           },
           error: (err) => {
@@ -487,11 +487,11 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     const requestObj: createSubmission = {
       code: btoa(this.form.value.code),
       languageId: this.form.value.language,
-      studentId: 1, // TODO: Replace with dynamic student ID
-      isSubmitted: false, // Temporary saves are never marked as submitted
-      questionId: 1 // TODO: Replace with dynamic question ID
+      studentId: 1,
+      isSubmitted: false,
+      questionId: this.questionId
     }
-    if(this.isFinalSubmissionHappen){
+    if (this.isFinalSubmissionHappen) {
       return
     }
     let apiObservable;
@@ -504,9 +504,9 @@ export class CodeEditorComponent implements OnInit, OnChanges {
     apiObservable.subscribe({
       next: (res: any) => {
         if (res.submissionId) {
-          if (!isUpdate) { // If it was a create operation, set the new submission ID
+          if (!isUpdate) {
             this.currentSubmissionId.set(res.submissionId);
-            localStorage.setItem('submissionId', res.submissionId); // Store in localStorage (FIXED TYPO HERE)
+            localStorage.setItem('submissionId', res.submissionId);
           }
           else {
             this.snackBar.open('Your code saved!', 'Close', {
@@ -529,20 +529,71 @@ export class CodeEditorComponent implements OnInit, OnChanges {
    * Fetches a previous submission by its ID and loads the code and language into the editor.
    * @param submissionId The ID of the submission to retrieve.
    */
-  getSubmission(submissionId: number) {
-    this.codeExecutionService.getSubmission(submissionId).subscribe({
+  // getSubmission(submissionId: number) {
+  //   this.codeExecutionService.getSubmission(submissionId).subscribe({
+  //     next: (res: any) => {
+  //       if (res) {
+  //         this.form.get('code')?.patchValue(atob(res.code));
+  //         this.form.get('language')?.setValue(res.languageId);
+  //         this.currentSubmissionId.set(submissionId);
+  //         this.isFinalSubmissionHappen = res.isSubmitted
+  //       }
+  //     },
+  //     error: (err) => {
+  //       this.snackBar.open('Failed to load previous submission.', 'Close', { duration: 3000 });
+  //       console.error('Error getting submission:', err);
+  //     }
+  //   });
+  // }
+
+  getSubmittedCode(questionId: number) {
+    this.codeExecutionService.getSubmissionByQuestionId(questionId).subscribe({
       next: (res: any) => {
         if (res) {
           this.form.get('code')?.patchValue(atob(res.code));
-          this.form.get('language')?.setValue(res.languageId); // Load the saved language
-          this.currentSubmissionId.set(submissionId); // Ensure the signal holds the correct ID
+          this.form.get('language')?.setValue(res.languageId);
+          this.form.get('language')?.setValue(res.languageId);
+          this.currentSubmissionId.set(res.submissionId);
           this.isFinalSubmissionHappen = res.isSubmitted
+        }
+        else if (this.selectedQuestion) {
+          this.generateBoilerplate(this.selectedQuestion);
+          if (!this.examStarted()) {
+            this.form.get('language')?.valueChanges
+              .pipe(takeUntilDestroyed(this.destroyRef)) // Automatically unsubscribe
+              .subscribe(() => {
+                this.languageChange.emit(this.form.get('language')?.value);
+                if (this.selectedQuestion) {
+                  this.generateBoilerplate(this.selectedQuestion);
+                }
+              });
+          }
         }
       },
       error: (err) => {
-        this.snackBar.open('Failed to load previous submission.', 'Close', { duration: 3000 });
-        console.error('Error getting submission:', err);
+        if (this.selectedQuestion) {
+          this.generateBoilerplate(this.selectedQuestion);
+          if (!this.examStarted()) {
+            this.form.get('language')?.valueChanges
+              .pipe(takeUntilDestroyed(this.destroyRef)) // Automatically unsubscribe
+              .subscribe(() => {
+                this.languageChange.emit(this.form.get('language')?.value);
+                if (this.selectedQuestion) {
+                  this.generateBoilerplate(this.selectedQuestion);
+                }
+              });
+          }
+        }
       }
     });
+  }
+  backToQuestions() {
+    if (this.examStarted()) {
+      this.submitExam(false);
+    }
+    else {
+      this.router.navigate(['/questions']);
+    }
+    localStorage.clear();
   }
 }

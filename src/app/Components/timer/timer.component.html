@@ -1,8 +1,12 @@
 <div class="timer-container">
     <span class="timer-display">{{ formatTime(timeLeft()) }}</span>
-    <button mat-stroked-button class="timer-button" *ngIf="!isRunning()" (click)="toggleTimer()">
-      Start Exam
-    </button>
+    @if (isRunning()) {
+    }
+    @else {
+      <button mat-stroked-button class="timer-button" *ngIf="!isRunning()" (click)="toggleTimer()">
+        Start Exam
+      </button>
+    }
     <!-- <button mat-stroked-button class="timer-button" (click)="resetTimer()">Reset</button> -->
   </div>
   

@@ -8,12 +8,13 @@ import { createSubmission } from '../Models/types';
 })
 export class CodeExecutorService {
   private apiUrl =
-    'https://judge0-ce.p.rapidapi.com/submissions/batch?base64_encoded=true&wait=false';
+    'http://192.168.69.59:2358/submissions/batch?base64_encoded=true&wait=true';
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
     // 'X-RapidAPI-Key': 'e5a09e9bc6mshf854b4046f46a91p1783aajsn96f7ba887d11',
-    'X-RapidAPI-Key': '8bcfaa3c7dmsh57f3479b1307378p1aa0bbjsn4d6f62005a85',
-    'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+    // 'X-RapidAPI-Key': '8bcfaa3c7dmsh57f3479b1307378p1aa0bbjsn4d6f62005a85',
+    'X-RapidAPI-Key': '',
+    'X-RapidAPI-Host': '192.168.69.59:2358',
   });
 
   constructor(private http: HttpClient) {}
@@ -38,7 +39,7 @@ export class CodeExecutorService {
   }
   runCode(payload: any): Observable<any> {
     return this.http.post(
-      'https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=false',
+      'http://192.168.69.59:2358/submissions?base64_encoded=true&wait=false',
       payload,
       { headers: this.headers }
     );
@@ -51,7 +52,7 @@ export class CodeExecutorService {
         'fields',
         'token,stdout,stderr,status_id,language_id,compile_output'
       );
-    return this.http.get(`https://judge0-ce.p.rapidapi.com/submissions/batch`, {
+    return this.http.get(`http://192.168.69.59:2358/submissions/batch`, {
       headers: this.headers,
       params,
     });
@@ -64,7 +65,7 @@ export class CodeExecutorService {
         'fields',
         'token,stdout,stderr,status_id,language_id,compile_output'
       );
-    return this.http.get(`https://judge0-ce.p.rapidapi.com/submissions/${token}?base64_encoded=true&fields=token,stdout,stderr,status_id,language_id,compile_output`, {
+    return this.http.get(`http://192.168.69.59:2358/submissions/${token}?base64_encoded=true&fields=token,stdout,stderr,status_id,language_id,compile_output`, {
       headers: this.headers,
     });
   }
@@ -76,5 +77,11 @@ export class CodeExecutorService {
   }
   getSubmission(submissionId: number) {
     return this.http.get(`http://localhost:5190/api/student/GetSubmissionById/${submissionId}`);
+  }
+  getSubmissionByQuestionId(questionId: number){
+    return this.http.get(`http://localhost:5190/api/student/GetSubmissionByQuestionId/${questionId}`);
+  }
+  getQuestions(){
+    return this.http.get('http://localhost:5190/api/student/GetAllQuestions');
   }
 }

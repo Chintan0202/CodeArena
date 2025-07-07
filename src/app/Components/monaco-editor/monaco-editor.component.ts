@@ -67,6 +67,11 @@ export class MonacoEditorComponent implements AfterViewInit, OnChanges {
         this.editor.setValue(value || '');
       }
     });
+
+    // this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, () => {});
+    // this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {});
+    // this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX, () => {});
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {

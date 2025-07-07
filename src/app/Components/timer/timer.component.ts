@@ -18,7 +18,7 @@ import {
 })
 export class TimerComponent implements OnInit, OnDestroy {
   private readonly STORAGE_KEY = 'countdown_end_time';
-  private readonly DEFAULT_TIME = 5 * 60; 
+  private readonly DEFAULT_TIME = 50 * 60; 
 
   @Output() timerCompleted = new EventEmitter<void>();
   @Output() examStarted = new EventEmitter<void>();
@@ -35,6 +35,7 @@ export class TimerComponent implements OnInit, OnDestroy {
       const end = parseInt(endTime, 10);
       const remaining = Math.floor((end - Date.now()) / 1000);
       this.timeLeft.set(remaining > 0 ? remaining : 0);
+      this.isRunning.set(true);
 
       if (remaining > 0) {
         this.startTimerInternal(end);

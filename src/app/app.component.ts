@@ -6,6 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { CodeExecutorService } from './Services/code-executor-service';
 import { HttpClientModule } from '@angular/common/http';
 import { CodeEditorLayoutComponent } from './Components/code-editor-layout-component/code-editor-layout-component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ import { CodeEditorLayoutComponent } from './Components/code-editor-layout-compo
     MatSelectModule,
     HttpClientModule,
     CodeEditorLayoutComponent,
+    RouterOutlet
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
